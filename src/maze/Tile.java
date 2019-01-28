@@ -1,10 +1,12 @@
 package maze;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
 public class Tile {
@@ -36,7 +38,7 @@ public class Tile {
 	// Drawing colors
 	private static final Color startcol = new Color(40, 215, 40);
 	private static final Color endcol = new Color(215, 40, 40);
-	private static final Color playcol = new Color(175, 175, 40); // TODO Tweak this color to match
+	private static final Color playcol = new Color(215, 215, 40);
 	private static final Color arrowcol = new Color(40, 40, 215);
 	private static final Color bgcol = new Color(40, 40, 40);
 	private static final Color visitcol = new Color(127, 127, 127);
@@ -149,8 +151,7 @@ public class Tile {
 	}
 
 	// Right arrow shape
-	private static final Shape arrowR = new Polygon(
-			new int[] { pxSize - pxSize / 4, pxSize - pxSize / 4, pxSize + pxSize / 4 },
+	private static final Shape arrowR = new Polygon(new int[] { pxSize - pxSize / 2, pxSize - pxSize / 2, pxSize },
 			new int[] { -pxSize / 4, pxSize / 4, 0 }, 3);
 	// Up arrow shape
 	private static final Shape arrowD = AffineTransform.getRotateInstance(Math.PI / 2).createTransformedShape(arrowR);
@@ -159,40 +160,54 @@ public class Tile {
 	// Down arrow shape
 	private static final Shape arrowU = AffineTransform.getRotateInstance(Math.PI / 2).createTransformedShape(arrowL);
 
+	private static final int strokeSize = 1;
+
 	// Draw choices
 	public void drawChoices(Graphics2D g, Tile[][] map) {
 		// Save previous transform
 		AffineTransform oldT = g.getTransform();
 		// Transform to center
-		g.transform(AffineTransform.getTranslateInstance(x * pxSize + pxSize/2, y * pxSize + pxSize/2));
+		g.transform(AffineTransform.getTranslateInstance(x * pxSize + pxSize / 2, y * pxSize + pxSize / 2));
 
 		if (getOpenUp()) {
 			Color borcol = map[x][y - 1].getVisited() ? bgcol : visitcol;
 			g.setColor(arrowcol);
 			g.fill(arrowU);
+			Stroke oldS = g.getStroke();
+			g.setStroke(new BasicStroke(strokeSize));
 			g.setColor(borcol);
 			g.draw(arrowU);
+			g.setStroke(oldS);
 		}
 		if (getOpenDown()) {
 			Color borcol = map[x][y + 1].getVisited() ? bgcol : visitcol;
 			g.setColor(arrowcol);
 			g.fill(arrowD);
+			Stroke oldS = g.getStroke();
+			g.setStroke(new BasicStroke(strokeSize));
 			g.setColor(borcol);
 			g.draw(arrowD);
+			g.setStroke(oldS);
 		}
 		if (getOpenLeft()) {
 			Color borcol = map[x - 1][y].getVisited() ? bgcol : visitcol;
 			g.setColor(arrowcol);
 			g.fill(arrowL);
+			Stroke oldS = g.getStroke();
+			g.setStroke(new BasicStroke(strokeSize));
 			g.setColor(borcol);
 			g.draw(arrowL);
+			g.setStroke(oldS);
 		}
 		if (getOpenRight()) {
 			Color borcol = map[x + 1][y].getVisited() ? bgcol : visitcol;
 			g.setColor(arrowcol);
 			g.fill(arrowR);
+			Stroke oldS = g.getStroke();
+			g.setStroke(new BasicStroke(strokeSize));
 			g.setColor(borcol);
 			g.draw(arrowR);
+			g.setStroke(oldS);
 		}
 		// Restore transform
 		g.setTransform(oldT);

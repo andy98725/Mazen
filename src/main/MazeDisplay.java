@@ -17,8 +17,6 @@ public class MazeDisplay extends JComponent {
 	public static final int prefWid = 512, prefHei = 512;
 	// Component dimensions
 	private final int wid, hei;
-	// Maze dimensions
-	private static final int minWid = 8, maxWid = 32;
 
 	// Random generator
 	private Random rand = new Random();
@@ -44,7 +42,7 @@ public class MazeDisplay extends JComponent {
 		// Only generate in correct mode
 		if (MODE == M_GEN) {
 			// Random size
-			int size = minWid + (int) Math.round(rand.nextDouble() * (maxWid - minWid));
+			int size = Maze.minWid + (int) Math.round(rand.nextDouble() * (Maze.maxWid - Maze.minWid));
 			// Generate maze
 			maze = new Maze(size);
 			// Draw
@@ -53,10 +51,20 @@ public class MazeDisplay extends JComponent {
 	}
 
 	// Initiate play mode
-	private void startPlay() {
+	private void setPlay() {
 		// Set mode and initialize maze
 		MODE = M_PLAY;
 		maze.start();
+		// Redraw
+		App.disp.repaint();
+	}
+
+	// Reinitiate gen mode
+	public void setGen() {
+		MODE = M_GEN;
+		maze.exit();
+		// Redraw
+		App.disp.repaint();
 	}
 
 	// Paint the maze
@@ -85,7 +93,7 @@ public class MazeDisplay extends JComponent {
 				break;
 			case KeyEvent.VK_ENTER:
 				// Start play mode
-				startPlay();
+				setPlay();
 				break;
 			}
 		}
@@ -93,6 +101,10 @@ public class MazeDisplay extends JComponent {
 		else if (MODE == M_PLAY) {
 			switch (keycode) {
 			default: // None
+				break;
+			case KeyEvent.VK_ESCAPE:
+				// Exit
+				setGen();
 				break;
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_W:

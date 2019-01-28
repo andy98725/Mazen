@@ -7,6 +7,8 @@ import main.App;
 
 public class Maze {
 
+	// Maze dimensions
+	public static final int minWid = 8, maxWid = 256;
 	// Iteration sleep time between jumps (in seconds)
 	private static final double sleepTime = 0.05;
 	// Wid and hei of maze
@@ -16,7 +18,7 @@ public class Maze {
 	private Tile[][] map;
 
 	// Navigation has started
-	private boolean hasStarted = false;
+	private boolean hasStarted = false, isActive = false;
 	// Navication location
 	private Point curLoc;
 	// Tile to display choice (volatile so it updates instantly)
@@ -34,20 +36,22 @@ public class Maze {
 
 	// Start navigating
 	public void start() {
+		isActive = true;
+		// If started, just rejoin
 		if (hasStarted) {
 			return;
 		}
+		// Start and begin iteration
 		hasStarted = true;
 		// Determine current loc by starting tile
 		Point startLoc = getStartingLoc();
-		// Check if corner
-//		if (map[startLoc.x][startLoc.y].getCorner()) {
-		// Start iterating right away
+		// Start iterating
 		iterate(startLoc, startLoc);
-//		} else {
-//			// Present choice initially
-//			setChoice(startLoc, map[startLoc.x][startLoc.y]);
-//		}
+	}
+
+	// Return to gen mode
+	public void exit() {
+		isActive = false;
 	}
 
 	private void iterate(Point loc, Point prevloc) {
@@ -61,6 +65,15 @@ public class Maze {
 		boolean visitState = tloc.getVisited();
 		map[prevloc.x][prevloc.y].setVisited(!visitState);
 		tloc.setVisited(true);
+		// Check goal condition
+		if (tloc.getEndTile()) {
+			// Set choice
+			setChoice(tloc);
+			// Return to gen mode
+			App.disp.setGen();
+			// Exit!
+			return;
+		}
 		// Check intersection
 		if (tloc.getIntersection()) {
 			// Set choice and end
@@ -144,6 +157,8 @@ public class Maze {
 	private void setChoice(Tile choice) {
 		// Set choice tile
 		choiceTile = choice;
+		// Force input
+		App.key.forceInput();
 		// Redraw
 		App.disp.repaint();
 	}
@@ -162,13 +177,16 @@ public class Maze {
 		}
 		// Only draw if running:
 		if (hasStarted) {
-			// Draw choice
-			if (choiceTile != null) {
-				choiceTile.drawChoices(g, map);
-			}
 			// Draw player
 			if (curLoc != null) {
 				map[curLoc.x][curLoc.y].drawPlayer(g);
+			}
+			// Only draw if active
+			if (isActive) {
+				// Draw choice
+				if (choiceTile != null) {
+					choiceTile.drawChoices(g, map);
+				}
 			}
 		}
 	}
@@ -194,7 +212,10 @@ public class Maze {
 		if (y > 0 && !choiceTile.getOpenDown()) {
 			return;
 		}
-		// Okay, it's a valid direction. Iterate on it.
+		// Okay, it's a valid direction.
+		// Clear input buffer
+		App.key.clearBuffer();
+		// Iterate direction
 		iterate(new Point(choiceTile.getX() + x, choiceTile.getY() + y),
 				new Point(choiceTile.getX(), choiceTile.getY()));
 	}

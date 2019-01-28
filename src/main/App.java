@@ -13,6 +13,8 @@ public class App {
 
 	// Frame for application
 	private static JFrame frame;
+	// Key listener
+	public static KeyInput key;
 
 	// Maze display active
 	public static MazeDisplay disp;
@@ -37,8 +39,9 @@ public class App {
 		frame.add(disp);
 		// Let user select (to get key inputs)
 		frame.setFocusable(true);
-		// Add inputs (keys only)
-		frame.addKeyListener(new KeyInput());
+		// Add key inputs
+		key = new KeyInput();
+		frame.addKeyListener(key);
 //		MouseInput mouse = new MouseInput();
 //		frame.addMouseListener(mouse);
 //		frame.addMouseMotionListener(mouse);
