@@ -3,6 +3,9 @@ package maze;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 
 public class Tile {
 	// bitwise identities
@@ -19,6 +22,8 @@ public class Tile {
 	private int x, y;
 
 	// Other properties
+	// Is visited?
+	private boolean isVisited = false;
 	// Is corner?
 	private boolean isCorner = false;
 	// Is intersection?
@@ -31,7 +36,10 @@ public class Tile {
 	// Drawing colors
 	private static final Color startcol = new Color(40, 215, 40);
 	private static final Color endcol = new Color(215, 40, 40);
+	private static final Color playcol = new Color(175, 175, 40); // TODO Tweak this color to match
+	private static final Color arrowcol = new Color(40, 40, 215);
 	private static final Color bgcol = new Color(40, 40, 40);
+	private static final Color visitcol = new Color(127, 127, 127);
 	private static final Color wallcol = new Color(215, 215, 215);
 
 	// Empty tile constructor
@@ -106,8 +114,8 @@ public class Tile {
 		// Locations
 		int xx = x * pxSize, yy = y * pxSize, ww = pxSize;
 		int x2 = xx + ww - wallSize, y2 = yy + ww - wallSize;
-		// Draw bg first
-		g.setColor(bgcol);
+		// Draw background
+		g.setColor(isVisited ? visitcol : bgcol);
 		g.fillRect(xx, yy, ww, ww);
 		// Draw start or end shape
 		if (startTile) {
@@ -140,7 +148,105 @@ public class Tile {
 		}
 	}
 
+	// Right arrow shape
+	private static final Shape arrowR = new Polygon(
+			new int[] { pxSize - pxSize / 4, pxSize - pxSize / 4, pxSize + pxSize / 4 },
+			new int[] { -pxSize / 4, pxSize / 4, 0 }, 3);
+	// Up arrow shape
+	private static final Shape arrowD = AffineTransform.getRotateInstance(Math.PI / 2).createTransformedShape(arrowR);
+	// Left arrow shape
+	private static final Shape arrowL = AffineTransform.getRotateInstance(Math.PI / 2).createTransformedShape(arrowD);
+	// Down arrow shape
+	private static final Shape arrowU = AffineTransform.getRotateInstance(Math.PI / 2).createTransformedShape(arrowL);
+
+	// Draw choices
+	public void drawChoices(Graphics2D g, Tile[][] map) {
+		// Save previous transform
+		AffineTransform oldT = g.getTransform();
+		// Transform to center
+		g.transform(AffineTransform.getTranslateInstance(x * pxSize + pxSize/2, y * pxSize + pxSize/2));
+
+		if (getOpenUp()) {
+			Color borcol = map[x][y - 1].getVisited() ? bgcol : visitcol;
+			g.setColor(arrowcol);
+			g.fill(arrowU);
+			g.setColor(borcol);
+			g.draw(arrowU);
+		}
+		if (getOpenDown()) {
+			Color borcol = map[x][y + 1].getVisited() ? bgcol : visitcol;
+			g.setColor(arrowcol);
+			g.fill(arrowD);
+			g.setColor(borcol);
+			g.draw(arrowD);
+		}
+		if (getOpenLeft()) {
+			Color borcol = map[x - 1][y].getVisited() ? bgcol : visitcol;
+			g.setColor(arrowcol);
+			g.fill(arrowL);
+			g.setColor(borcol);
+			g.draw(arrowL);
+		}
+		if (getOpenRight()) {
+			Color borcol = map[x + 1][y].getVisited() ? bgcol : visitcol;
+			g.setColor(arrowcol);
+			g.fill(arrowR);
+			g.setColor(borcol);
+			g.draw(arrowR);
+		}
+		// Restore transform
+		g.setTransform(oldT);
+	}
+
+	// Draw player
+	public void drawPlayer(Graphics2D g) {
+		// Locations
+		int xx = x * pxSize, yy = y * pxSize, ww = pxSize;
+		// Draw player shape
+		g.setColor(playcol);
+		g.fillRect(xx + wallSize, yy + wallSize, ww - 2 * wallSize, ww - 2 * wallSize);
+
+	}
+
 	// Basic gets/sets
+
+	public boolean getIntersection() {
+		// Explanation: Still prompt user for corner.
+		return isIntersection || isCorner;
+	}
+
+	public boolean getOpenUp() {
+		return (ID & ID_UP) != 0;
+	}
+
+	public boolean getOpenLeft() {
+		return (ID & ID_LEFT) != 0;
+	}
+
+	public boolean getOpenDown() {
+		return (ID & ID_DOWN) != 0;
+	}
+
+	public boolean getOpenRight() {
+		return (ID & ID_RIGHT) != 0;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public boolean getVisited() {
+		return isVisited;
+	}
+
+	public void setVisited(boolean set) {
+		isVisited = set;
+	}
+
 	public void setStartTile() {
 		// Don't do if end tile
 		if (endTile) {

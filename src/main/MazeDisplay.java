@@ -54,7 +54,9 @@ public class MazeDisplay extends JComponent {
 
 	// Initiate play mode
 	private void startPlay() {
-
+		// Set mode and initialize maze
+		MODE = M_PLAY;
+		maze.start();
 	}
 
 	// Paint the maze
@@ -92,7 +94,26 @@ public class MazeDisplay extends JComponent {
 			switch (keycode) {
 			default: // None
 				break;
-			// TODO
+			case KeyEvent.VK_UP:
+			case KeyEvent.VK_W:
+				// Move up
+				maze.inputDirection(0, -1);
+				break;
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_S:
+				// Move down
+				maze.inputDirection(0, 1);
+				break;
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_A:
+				// Move left
+				maze.inputDirection(-1, 0);
+				break;
+			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_D:
+				// Move right
+				maze.inputDirection(1, 0);
+				break;
 			}
 		}
 	}
